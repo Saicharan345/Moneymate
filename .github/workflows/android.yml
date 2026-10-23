@@ -25,16 +25,7 @@ jobs:
           yes | sdkmanager --licenses || true
 
       - name: Run JVM Unit Tests
-        id: unit_tests
-        run: |
-          set -o pipefail
-          ./gradlew testDebugUnitTest --no-daemon --stacktrace 2>&1 | tee test_output.log
-
-      - name: Annotate Failure
-        if: failure()
-        run: |
-          ERR_MSG=$(grep -E "(FAILURE:|Caused by:|What went wrong:|A problem occurred)" -A 5 test_output.log | head -n 20 | tr '\n' ' ' | sed 's/"//g')
-          echo "::error title=Root Cause::$ERR_MSG"
+        run: ./gradlew testDebugUnitTest --no-daemon
 
       - name: Build Debug APK
-        run: ./gradlew assembleDebug --no-daemon --stacktrace
+        run: ./gradlew assembleDebug --no-daemon
