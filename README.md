@@ -1,6 +1,7 @@
 # MoneyMate — Personal Finance Manager
 
 <p align="center">
+  <a href="https://github.com/Saicharan345/Moneymate/actions/workflows/android.yml"><img src="https://github.com/Saicharan345/Moneymate/actions/workflows/android.yml/badge.svg" alt="Android CI" /></a>
   <img src="https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
   <img src="https://img.shields.io/badge/Jetpack%20Compose-BOM%202024.06.00-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
   <img src="https://img.shields.io/badge/Material%203-Design-blue?style=for-the-badge" alt="Material 3" />
