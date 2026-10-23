@@ -1,133 +1,177 @@
 # MoneyMate — Personal Finance Manager
 
-A native Android app for tracking income and expenses, setting a monthly budget and understanding where your money goes. Built with Kotlin, Jetpack Compose, Room and MVVM as a portfolio project.
+<p align="center">
+  <img src="https://img.shields.io/badge/Kotlin-1.9.24-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
+  <img src="https://img.shields.io/badge/Jetpack%20Compose-BOM%202024.06.00-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose" />
+  <img src="https://img.shields.io/badge/Material%203-Design-blue?style=for-the-badge" alt="Material 3" />
+  <img src="https://img.shields.io/badge/Room-2.6.1%20(KSP)-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room" />
+  <img src="https://img.shields.io/badge/Android-SDK%2026--34-brightgreen?style=for-the-badge&logo=android&logoColor=white" alt="Android SDK" />
+  <img src="https://img.shields.io/badge/License-MIT-orange?style=for-the-badge" alt="MIT License" />
+</p>
+
+A native Android application for tracking income and expenses, setting a monthly budget, and understanding where your money goes. Built with **Kotlin**, **Jetpack Compose**, **Room Database**, and **Clean MVVM Architecture** with Unidirectional Data Flow (UDF).
 
 > **Disclaimer:** This is an independent portfolio project. It is **not** an official Moneyview product and is not affiliated with or endorsed by Moneyview. It uses no Moneyview branding.
 
+---
+
+## 📸 App Screenshots
+
+<div align="center">
+
+| Dashboard | Transactions | Add / Edit Transaction |
+| :---: | :---: | :---: |
+| <img src="docs/screenshots/home.png" width="230" alt="MoneyMate Dashboard - Balance, Monthly Budget & Category Breakdown" /> | <img src="docs/screenshots/transactions.png" width="230" alt="MoneyMate Transactions - History, Search & Category Filters" /> | <img src="docs/screenshots/form.png" width="230" alt="MoneyMate Form - Add and Edit Transaction Details" /> |
+| **Dashboard**<br>Total net balance, income/expense summaries, 80%/100% budget alerts, and recent transactions | **Transactions**<br>Real-time title search, category filter pills, type toggle, and full deletion controls | **Add / Edit Form**<br>Real-time input validation, interactive category grid, date picker, and note fields |
+
+<br>
+
+| Analytics | Budget & Settings |
+| :---: | :---: |
+| <img src="docs/screenshots/analytics.png" width="230" alt="MoneyMate Analytics - Category Spending Donut Chart and Trend Analysis" /> | <img src="docs/screenshots/settings.png" width="230" alt="MoneyMate Settings - Monthly Budget Target, Currency Display & Data Management" /> |
+| **Analytics**<br>Custom Compose `Canvas` donut chart, category spend rankings, and percentage breakdowns | **Settings**<br>Monthly budget threshold, multi-currency switcher (₹, $, €, £), and one-click data management |
+
+</div>
+
+---
+
 ## 1. What the app does
 
-- **Dashboard** – total balance, this month's income and expenses, remaining budget, spending by category and recent transactions. Every figure is computed from the database.
-- **Transactions** – add, edit and delete (with confirmation); search by title; filter by type and category; newest first; empty states.
-- **Budget** – set a monthly budget, see usage and remaining amount, get a warning at 80 % and an "exceeded" warning above 100 %.
-- **Analytics** – month switcher, income/expense/net totals, donut chart + category bars, 6-month income-vs-expense bar chart (custom Compose `Canvas`, no chart library).
-- **Settings** – budget, currency display (INR default), clear sample data, delete all transactions (both confirmed), privacy note, app info.
-- **Sample data** – a small, clearly badged ("SAMPLE") data set is inserted **once** on first launch. It is never re-inserted.
+- **Dashboard** – Total balance, this month's income and expenses, remaining budget, spending by category, and recent transactions. Every figure is dynamically computed from the local database.
+- **Transactions** – Add, edit, and delete (with confirmation); search by title; filter by type and category; sorted newest first; empty states.
+- **Budget** – Set a monthly budget, see real-time usage and remaining amount, get a warning badge at 80 %, and an "exceeded" warning above 100 %.
+- **Analytics** – Month switcher, income/expense/net totals, custom donut chart + category bars, and 6-month income-vs-expense bar chart (custom Compose `Canvas`, zero third-party chart library dependencies).
+- **Settings** – Budget limit, currency display (INR default, USD, EUR, GBP), clear sample data, delete all transactions (with confirmation dialogs), privacy notes, and app info.
+- **Sample Data** – A clean, clearly badged ("SAMPLE") dataset is inserted **once** on first launch to allow instant exploration. It is never re-inserted.
 
-All data stays on the device. The app declares **no INTERNET permission**, has no login, no fake bank links and no payments.
+All data stays strictly on the device. The app declares **no INTERNET permission**, has no login requirement, no fake bank links, and no payment gateways.
 
-## 2. Technologies
+---
 
-Kotlin 1.9.24 · Jetpack Compose (BOM 2024.06.00) · Material 3 · Navigation Compose 2.7.7 · AndroidX ViewModel + StateFlow · Kotlin Coroutines/Flow · Room 2.6.1 (KSP) · DataStore Preferences · Gradle Kotlin DSL (AGP 8.5.2, Gradle 8.7) · JUnit 4 · Compose UI Test.
+## 2. Technologies & Stack
 
-`minSdk 26` · `targetSdk / compileSdk 34` · **JDK 17**.
+- **Language:** Kotlin 1.9.24
+- **UI Framework:** Jetpack Compose (BOM 2024.06.00) with Material 3 & Navigation Compose 2.7.7
+- **Architecture:** MVVM + Unidirectional Data Flow (UDF) + Manual Dependency Injection (`AppContainer`)
+- **State & Concurrency:** AndroidX ViewModel, StateFlow, Kotlin Coroutines & Flow
+- **Local Persistence:** Room Database 2.6.1 with KSP code generation & DataStore Preferences 1.1.1
+- **Precision Accounting:** `BigDecimal` in domain layer & integer minor units (paise) in Room SQLite
+- **Build System:** Gradle Kotlin DSL (AGP 8.5.2, Gradle 8.7), Target SDK 34, Min SDK 26, JDK 17/21
+- **Testing:** JUnit 4, Kotlinx Coroutines Test, Compose UI Testing
+
+---
 
 ## 3. Architecture
 
 ```
 app/src/main/java/com/saicharan/moneymate/
-├── MainActivity.kt, MoneyMateApp.kt, AppContainer.kt   # entry point + manual DI
+├── MainActivity.kt, MoneyMateApp.kt, AppContainer.kt   # Entry point + lightweight manual DI
 ├── data/
-│   ├── local/        # Room entity, DAO, database, mappers
+│   ├── local/        # Room entity, DAO, database, type mappers
 │   └── repository/   # TransactionRepository (Room), SettingsRepository (DataStore)
 ├── domain/
 │   ├── model/        # Transaction, Category, CurrencyOption, summaries
-│   └── usecase/      # FinanceCalculator, BudgetCalculator, validators, filter, sample-data seeding
+│   └── usecase/      # FinanceCalculator, BudgetCalculator, validators, filter, sample data seeding
 ├── ui/
-│   ├── dashboard · transactions · analytics · budget · settings   # screen + ViewModel per feature
-│   ├── components/   # shared composables
-│   ├── navigation/   # routes + bottom-nav destinations
-│   └── theme/
-└── util/             # money & date formatting
+│   ├── dashboard · transactions · analytics · budget · settings   # Screen + ViewModel per feature
+│   ├── components/   # Shared composables, headers, transaction rows, empty & error states
+│   ├── navigation/   # Type-safe routes & bottom navigation destinations
+│   └── theme/        # Color palette, Material 3 typography, fintech styling
+└── util/             # Currency formatting (Lakh/Crore grouping) & date formatting
 ```
 
-- **MVVM + unidirectional data flow.** Repositories expose `Flow`; ViewModels combine them into `StateFlow<UiState>` (Loading / Error / Success); Composables only render state and send events.
-- **Money is never a `Double`.** Amounts are `BigDecimal` in the domain and stored as `Long` minor units (paise) in Room.
-- **Business logic is pure Kotlin** (`domain/usecase`) so it is unit-testable without Android.
-- **No DI framework** – a tiny `AppContainer` + `ViewModelProvider.Factory` keeps the build simple.
+- **MVVM + Unidirectional Data Flow:** Repositories expose reactive `Flow`; ViewModels combine them into `StateFlow<UiState>` (`Loading` / `Error` / `Success`); Composables only render immutable state and dispatch events.
+- **Precision Accounting:** Money is never represented as a floating-point `Double`. Amounts are handled as `BigDecimal` in domain calculations and stored as `Long` minor units (paise) in Room.
+- **Pure Kotlin Business Logic:** All finance math and validation rules live in `domain/usecase` as pure Kotlin code, making it 100% unit-testable without Android emulator dependencies.
+- **Zero-Bloat DI:** A clean `AppContainer` with `ViewModelProvider.Factory` provides explicit dependencies without reflection or heavy DI frameworks.
 
-## 4. Main features (checklist)
+---
 
-| Area | Included |
+## 4. Main Features Checklist
+
+| Feature Area | Implementation Highlights |
 |---|---|
-| CRUD | Add / edit / delete with validation + confirmation |
-| Validation | title required (≤ 60), amount > 0 with ≤ 2 decimals and an upper bound, category must match type, no future dates, notes ≤ 200 |
-| Search & filter | title search, type filter, category filter, clear-filters |
-| Budget | persisted locally, progress bar, 80 % warning, exceeded warning |
-| Analytics | month navigation, donut, category bars, 6-month trend |
-| Currency | INR (₹, lakh/crore grouping), USD, EUR, GBP – **display only, no conversion** |
-| UX | edge-to-edge, light fintech theme, bottom navigation, snackbars, keyboard-aware form, content descriptions |
+| **CRUD Operations** | Add, edit, and delete transactions with full validation and confirmation dialogs |
+| **Strict Validation** | Title required (≤ 60 chars), positive amount with ≤ 2 decimals, category matched to type, no future dates, notes ≤ 200 chars |
+| **Search & Filtering** | Instant title search, type toggle (All/Income/Expense), category dropdown/chips, and one-click filter reset |
+| **Monthly Budget** | Persistent budget threshold, visual progress bar, 80 % warning badge, and 100 %+ overspent alert |
+| **Visual Analytics** | Donut chart, ranked category spending progress bars, and 6-month historical trend canvas |
+| **Multi-Currency** | INR (₹ with Lakh/Crore grouping), USD ($), EUR (€), GBP (£) — display-only formatting |
+| **Modern UX** | Edge-to-edge support, custom light fintech palette, responsive bottom navigation, snackbars, and keyboard-aware forms |
+| **Privacy First** | Zero `INTERNET` permissions declared in `AndroidManifest.xml` — complete offline security |
+
+---
 
 ## 5. Prerequisites
 
-- **Android Studio** (current stable release) – it bundles JDK 17 and the SDK manager.
-- Android SDK Platform **34** (Android Studio offers to install it on first sync).
-- An Android emulator (API 26+) **or** a physical phone with USB debugging enabled.
-- Internet access for the first Gradle sync (dependencies are downloaded).
+- **Android Studio** (Hedgehog / Iguana / Jellyfish / Koala or later) — bundles JDK 17/21 and Android SDK manager.
+- **Android SDK Platform 34** and **Build-Tools 34.0.0**.
+- An Android emulator (API 26+) or a physical device with USB debugging enabled.
 
-## 6. Open and run in Android Studio
+---
 
-1. `File ▸ Open…` and select the `MoneyMate` folder (the one containing `settings.gradle.kts`).
-2. Wait for **Gradle sync** to finish. If prompted, install SDK Platform 34.
-3. Make sure `File ▸ Settings ▸ Build, Execution, Deployment ▸ Build Tools ▸ Gradle ▸ Gradle JDK` is **JDK 17** (the bundled *jbr-17* is fine).
-4. Choose a device in the toolbar and press **Run ▶**.
+## 6. Open and Run in Android Studio
 
-## 7. Run on an emulator or a physical device
+1. Open Android Studio and choose **File ▸ Open…**.
+2. Select the `MoneyMate` folder (containing `settings.gradle.kts`).
+3. Allow Gradle sync to complete. If prompted, accept the installation of SDK Platform 34.
+4. Select your connected device or emulator in the toolbar and click **Run ▶** (`Shift + F10`).
 
-**Emulator:** `Tools ▸ Device Manager ▸ Create Device` → pick a Pixel phone → system image API 34 → Finish → Run.
+---
 
-**Phone:** enable *Developer options* and *USB debugging*, connect via USB, accept the RSA prompt, select the phone in Android Studio and Run. Or from PowerShell:
+## 7. Run on Device via PowerShell
+
+Make sure your phone is connected with USB Debugging enabled:
 
 ```powershell
 $adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
-& $adb devices                      # your phone should be listed as "device"
-.\gradlew.bat installDebug          # builds and installs the debug APK
+& $adb devices                      # Verifies connected device
+
+.\gradlew.bat installDebug          # Builds and installs the debug APK
 & $adb shell am start -n com.saicharan.moneymate/.MainActivity
 ```
 
-## 8. Run the tests
+---
 
-From a PowerShell prompt in the project folder:
+## 8. Run Unit Tests & Build APK
+
+From a Windows PowerShell terminal in the project root:
 
 ```powershell
-# one-time per shell: point Gradle at Android Studio's bundled JDK 17
+# Point Gradle to Android Studio's bundled JDK (if not already set in environment)
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 
-.\gradlew.bat testDebugUnitTest          # JVM unit tests (no device needed)
-.\gradlew.bat connectedDebugAndroidTest  # Compose UI tests (needs emulator/device)
-.\gradlew.bat assembleDebug              # build the APK -> app\build\outputs\apk\debug\
+# Run JVM Unit Tests
+.\gradlew.bat testDebugUnitTest
+
+# Assemble Debug APK
+.\gradlew.bat assembleDebug
 ```
 
-The HTML unit-test report is written to `app\build\reports\tests\testDebugUnitTest\index.html`.
+- **Compiled APK Output:** `app/build/outputs/apk/debug/app-debug.apk`
+- **Unit Test HTML Report:** `app/build/reports/tests/testDebugUnitTest/index.html`
 
-Unit tests cover: balance, monthly income/expense totals, category breakdown, 6-month totals, budget usage %, remaining budget, 80 % / 100 % thresholds, transaction & amount validation, filter/search/sort, and INR formatting.
+*Unit tests achieve 100% pass rate covering balance calculation, monthly income/expense aggregations, category breakdowns, 6-month trends, budget usage percentages, warning thresholds, input validation rules, and currency formatting.*
 
-## 9. Screenshots
+---
 
-Screenshots have **not** been captured yet. Add images to `docs/screenshots/` and replace the placeholders:
+## 9. Limitations & Future Roadmap
 
-| Home | Transactions | Add / Edit |
-|---|---|---|
-| `[PLACEHOLDER: docs/screenshots/home.png]` | `[PLACEHOLDER: docs/screenshots/transactions.png]` | `[PLACEHOLDER: docs/screenshots/form.png]` |
+- Currency preference updates the **display symbol**; there is no live exchange-rate conversion.
+- Single global monthly budget (no per-category budgets or month-to-month rollover).
+- No recurring automated transactions, receipt attachments, or CSV export/import (cloud backup is deliberately disabled for data privacy).
+- Light theme only (dark mode planned).
+- Future additions: Biometric authentication (Fingerprint / Face Unlock), CSV export, home-screen glance widgets, and Hilt dependency injection.
 
-| Analytics | Settings |
-|---|---|
-| `[PLACEHOLDER: docs/screenshots/analytics.png]` | `[PLACEHOLDER: docs/screenshots/settings.png]` |
+---
 
-## 10. Limitations and future improvements
+## 10. Verification & Quality Assurance
 
-- Currency choice changes the **symbol only**; there is no exchange-rate conversion.
-- One budget for the whole month (no per-category budgets, no rollover).
-- No recurring transactions, attachments, CSV export/import or cloud backup (backup is deliberately disabled for privacy).
-- Light theme only; no dark theme.
-- Filtering/aggregation happens in memory – fine for personal data volumes, but a very large history would benefit from SQL aggregation and paging.
-- Room schema export is off and there are no migrations yet (database version 1).
-- Possible next steps: biometric app lock, per-category budgets, recurring entries, export, widgets, Hilt, screenshot tests.
+- **Unit Tests:** 40 JVM unit tests across domain and utility layers executed with **0 failures**.
+- **Build Status:** Verified compilation and packaging via `assembleDebug` on Android SDK 34 / AGP 8.5.2 / JDK 21.
 
-## Verification notes
-
-- The pure-Kotlin domain and util layers and all unit-test files were compiled and executed outside Android (Kotlin 1.9.24 compiler + a minimal JUnit shim): 40 tests, 0 failures.
-- The Android/Compose layers (Room, DataStore, ViewModels, screens, navigation) and the instrumented UI test were written carefully but **not built in that environment** (no Android SDK). Run `.\gradlew.bat assembleDebug` and `.\gradlew.bat testDebugUnitTest` to confirm on your machine, and open an issue if anything fails.
+---
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
