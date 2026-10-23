@@ -19,16 +19,23 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - name: Setup Android SDK
+      - name: Configure Android SDK
         run: |
-          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
-          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager "platforms;android-34" "build-tools;34.0.0" || true
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          yes | sdkmanager --licenses || true
 
       - name: Run JVM Unit Tests
-        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+        run: |
+          ./gradlew testDebugUnitTest --no-daemon --stacktrace 2>&1 | tee test_output.log
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Show Failure Logs
+        if: failure()
+        run: |
+          echo "### Gradle Log on Failure" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          tail -n 80 test_output.log >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
