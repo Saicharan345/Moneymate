@@ -25,17 +25,16 @@ jobs:
           yes | sdkmanager --licenses || true
 
       - name: Run JVM Unit Tests
+        id: unit_tests
         run: |
+          set -o pipefail
           ./gradlew testDebugUnitTest --no-daemon --stacktrace 2>&1 | tee test_output.log
-          test ${PIPESTATUS[0]} -eq 0
 
-      - name: Show Failure Logs
+      - name: Annotate Failure
         if: failure()
         run: |
-          echo "### Gradle Log on Failure" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          tail -n 80 test_output.log >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          ERR_MSG=$(tail -n 30 test_output.log | tr '\n' ' ' | sed 's/"//g')
+          echo "::error title=Gradle Failure::$ERR_MSG"
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
