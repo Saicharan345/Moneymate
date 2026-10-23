@@ -33,8 +33,8 @@ jobs:
       - name: Annotate Failure
         if: failure()
         run: |
-          ERR_MSG=$(tail -n 30 test_output.log | tr '\n' ' ' | sed 's/"//g')
-          echo "::error title=Gradle Failure::$ERR_MSG"
+          ERR_MSG=$(grep -E "(FAILURE:|Caused by:|What went wrong:|A problem occurred)" -A 5 test_output.log | head -n 20 | tr '\n' ' ' | sed 's/"//g')
+          echo "::error title=Root Cause::$ERR_MSG"
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
